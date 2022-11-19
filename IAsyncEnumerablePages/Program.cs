@@ -1,23 +1,45 @@
 ﻿using IAsyncEnumerablePages;
+using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Attributes;
+using System.Security.Cryptography;
 
-Console.WriteLine("Hello, World!");
-
-var producerA = new ProducerA();
-var isEven = new IsEven();
-var dumper = new Dumper();
-
-
-/// Await Each page 
-//await  foreach (var page in producerA.GetData())
-//{
-//    var processedPAge = await isEven.GetIsEvenPage(page);
-//    await dumper.Display(processedPAge);
-//}
-
-
-/// Await all but run in Each page parallel
-await Parallel.ForEachAsync(producerA.GetData(), async (page, ct) =>
+public class Program
+{
+    public static void Main(string[] args)
     {
-        var processedPAge = await isEven.GetIsEvenPage(page);
-        await dumper.Display(processedPAge);
-    });
+        var summary = BenchmarkRunner.Run<IAsyncBench>();
+    }
+}
+
+
+
+public class IAsyncBench
+{
+    private ProducerA producerA = new ProducerA();
+    private IsEven isEven = new IsEven();
+    private Dumper dumper = new Dumper();
+
+
+    [Benchmark]
+    public async Task SimpleIAsync()
+    {
+        /// Await Each page 
+        await foreach (var page in producerA.GetData())
+        {
+            var processedPAge = await isEven.GetIsEvenPage(page);
+            await dumper.Display(processedPAge);
+        }
+
+    }
+
+    [Benchmark]
+    public async Task PArallelIAsync()
+    {
+        await Parallel.ForEachAsync(producerA.GetData(), async (page, ct) =>
+        {
+            var processedPAge = await isEven.GetIsEvenPage(page);
+            await dumper.Display(processedPAge);
+        });
+    }
+
+}
