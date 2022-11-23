@@ -13,8 +13,8 @@ Intel Core i7-10700K CPU 3.80GHz, 1 CPU, 16 logical and 8 physical cores
 
 |         Method |     Mean |    Error |   StdDev |
 |--------------- |---------:|---------:|---------:|
-|   SimpleIAsync | 21.266 s | 0.0388 s | 0.0363 s |
-| PArallelIAsync |  3.109 s | 0.0064 s | 0.0060 s |
+|   SimpleIAsync | 21.296 s | 0.0138 s | 0.0129 s |
+| ParallelIAsync |  3.106 s | 0.0077 s | 0.0072 s |
 
 *Legends*
 

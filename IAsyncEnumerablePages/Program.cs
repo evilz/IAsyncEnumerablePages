@@ -2,6 +2,7 @@
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Attributes;
 using System.Security.Cryptography;
+using BenchmarkDotNet.Configs;
 
 public class Program
 {
@@ -15,8 +16,8 @@ public class Program
 
 public class IAsyncBench
 {
-    private ProducerA producerA = new ProducerA();
-    private IsEven isEven = new IsEven();
+    private PersonService personService = new PersonService();
+    private VehicleService vehicleService = new VehicleService();
     private Dumper dumper = new Dumper();
 
 
@@ -24,20 +25,22 @@ public class IAsyncBench
     public async Task SimpleIAsync()
     {
         /// Await Each page 
-        await foreach (var page in producerA.GetData())
+        await foreach (var page in personService.GetData())
         {
-            var processedPAge = await isEven.GetIsEvenPage(page);
+            var map = page.ToDictionary(x=>x.UserName, x => x);
+            var processedPAge = await vehicleService.GetVehicle(map);
             await dumper.Display(processedPAge);
         }
 
     }
 
     [Benchmark]
-    public async Task PArallelIAsync()
+    public async Task ParallelIAsync()
     {
-        await Parallel.ForEachAsync(producerA.GetData(), async (page, ct) =>
+        await Parallel.ForEachAsync(personService.GetData(), async (page, ct) =>
         {
-            var processedPAge = await isEven.GetIsEvenPage(page);
+            var map = page.ToDictionary(x => x.UserName, x => x);
+            var processedPAge = await vehicleService.GetVehicle(map);
             await dumper.Display(processedPAge);
         });
     }
