@@ -41,8 +41,18 @@ jobs:
         # Read benchmark results
         benchmark_results_file = Path('BenchmarkDotNet.Artifacts/results/IAsyncBench-report.json')
         if not benchmark_results_file.exists():
-            print("Benchmark results file not found")
-            exit(1)
+            # Try to find any JSON report file
+            results_dir = Path('BenchmarkDotNet.Artifacts/results')
+            if results_dir.exists():
+                json_files = list(results_dir.glob('*-report.json'))
+                if json_files:
+                    benchmark_results_file = json_files[0]
+                else:
+                    print("No benchmark results JSON file found")
+                    exit(1)
+            else:
+                print("Benchmark results directory not found")
+                exit(1)
         
         with open(benchmark_results_file, 'r') as f:
             data = json.load(f)
@@ -52,6 +62,7 @@ jobs:
         
         # Build benchmark output table
         benchmark_output = f"""# Benchmark
+
 
 ```sh
 
