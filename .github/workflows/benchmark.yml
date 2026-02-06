@@ -110,12 +110,22 @@ BenchmarkDotNet={data.get('Title', 'Unknown')}, OS={env_info.get('OsVersion', 'U
         with open(readme_path, 'r') as f:
             readme_content = f.read()
         
-        # Note: Currently the README.md only contains benchmark results,
-        # so we replace the entire file. If the README grows to include
-        # other content, this should be updated to only replace the
-        # benchmark section between markers.
+        start_marker = "<!-- BENCHMARKS:START -->"
+        end_marker = "<!-- BENCHMARKS:END -->"
+
+        if start_marker in readme_content and end_marker in readme_content:
+            pattern = re.compile(
+                re.escape(start_marker) + r".*?" + re.escape(end_marker),
+                re.DOTALL,
+            )
+            replacement = f"{start_marker}\n{benchmark_output}\n{end_marker}"
+            readme_content = pattern.sub(replacement, readme_content)
+        else:
+            # Fallback: keep the previous behavior (overwrite) if markers aren't present.
+            readme_content = benchmark_output
+
         with open(readme_path, 'w') as f:
-            f.write(benchmark_output)
+            f.write(readme_content)
         
         print("README.md updated successfully")
     
