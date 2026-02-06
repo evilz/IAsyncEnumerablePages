@@ -8,11 +8,11 @@
             CancellationToken cancellationToken = default)
         {
             Console.WriteLine("IO");
-            await Task.Delay(1000, cancellationToken);
+            await Task.Delay(100, cancellationToken);
 
             foreach (var item in page)
             {
-                Console.WriteLine($"{item.Key} - {item.Value.Person.FirstName} : {item.Value.Vehicle.Manufacturer}");
+               // Console.WriteLine($"{item.Key} - {item.Value.Person.FirstName} : {item.Value.Vehicle.Manufacturer}");
             }
         }
     }
