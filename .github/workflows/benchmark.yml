@@ -1,0 +1,132 @@
+name: Benchmark
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --no-restore -c Release
+    
+    - name: Run Benchmarks
+      run: dotnet run -c Release --project IAsyncEnumerablePages/IAsyncEnumerablePages.csproj --no-build -- --exporters json
+    
+    - name: Parse and Update README
+      shell: python
+      run: |
+        import json
+        import re
+        from pathlib import Path
+        
+        # Read benchmark results
+        benchmark_results_file = Path('BenchmarkDotNet.Artifacts/results/IAsyncBench-report.json')
+        if not benchmark_results_file.exists():
+            # Try to find any JSON report file
+            results_dir = Path('BenchmarkDotNet.Artifacts/results')
+            if results_dir.exists():
+                json_files = list(results_dir.glob('*-report.json'))
+                if json_files:
+                    benchmark_results_file = json_files[0]
+                else:
+                    print("No benchmark results JSON file found")
+                    exit(1)
+            else:
+                print("Benchmark results directory not found")
+                exit(1)
+        
+        with open(benchmark_results_file, 'r') as f:
+            data = json.load(f)
+        
+        # Extract environment information
+        env_info = data.get('HostEnvironmentInfo', {})
+        
+        # Build benchmark output table
+        benchmark_output = f"""# Benchmark
+
+
+```sh
+
+BenchmarkDotNet={data.get('Title', 'Unknown')}, OS={env_info.get('OsVersion', 'Unknown')}
+{env_info.get('ProcessorName', 'Unknown')}
+.NET SDK={env_info.get('DotNetSdkVersion', 'Unknown')}
+  [Host]     : {env_info.get('RuntimeVersion', 'Unknown')}, {env_info.get('Architecture', 'Unknown')} {env_info.get('JitInfo', 'Unknown')}
+  DefaultJob : {env_info.get('RuntimeVersion', 'Unknown')}, {env_info.get('Architecture', 'Unknown')} {env_info.get('JitInfo', 'Unknown')}
+
+```
+
+|         Method |     Mean |    Error |   StdDev |
+|--------------- |---------:|---------:|---------:|
+"""
+        
+        # Add benchmark results
+        for benchmark in data.get('Benchmarks', []):
+            stats = benchmark.get('Statistics', {})
+            method = benchmark.get('FullName', '').split('.')[-1]
+            mean = stats.get('Mean', 0)
+            error = stats.get('StandardError', 0)
+            stddev = stats.get('StandardDeviation', 0)
+            
+            # Format values with appropriate units
+            def format_time(nanoseconds):
+                if nanoseconds >= 1e9:
+                    return f"{nanoseconds / 1e9:.3f} s"
+                elif nanoseconds >= 1e6:
+                    return f"{nanoseconds / 1e6:.3f} ms"
+                elif nanoseconds >= 1e3:
+                    return f"{nanoseconds / 1e3:.3f} μs"
+                else:
+                    return f"{nanoseconds:.3f} ns"
+            
+            benchmark_output += f"| {method:14} | {format_time(mean):8} | {format_time(error):8} | {format_time(stddev):8} |\n"
+        
+        benchmark_output += """
+*Legends*
+
+- Mean   : Arithmetic mean of all measurements
+- Error  : Half of 99.9% confidence interval
+- StdDev : Standard deviation of all measurements
+- 1 s    : 1 Second (1 sec)"""
+        
+        # Read current README
+        readme_path = Path('README.md')
+        with open(readme_path, 'r') as f:
+            readme_content = f.read()
+        
+        # Note: Currently the README.md only contains benchmark results,
+        # so we replace the entire file. If the README grows to include
+        # other content, this should be updated to only replace the
+        # benchmark section between markers.
+        with open(readme_path, 'w') as f:
+            f.write(benchmark_output)
+        
+        print("README.md updated successfully")
+    
+    - name: Commit and Push Changes
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add README.md
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Update benchmark results [skip ci]"
+          git push
+        fi
