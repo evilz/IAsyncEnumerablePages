@@ -1,37 +1,31 @@
-﻿using IAsyncEnumerablePages;
+﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using BenchmarkDotNet.Attributes;
-using System.Security.Cryptography;
-using BenchmarkDotNet.Configs;
+using IAsyncEnumerablePages;
 
 public class Program
 {
     public static void Main(string[] args)
     {
-        var summary = BenchmarkRunner.Run<IAsyncBench>();
+        BenchmarkRunner.Run<IAsyncBench>();
     }
 }
 
-
-
 public class IAsyncBench
 {
-    private PersonService personService = new PersonService();
-    private VehicleService vehicleService = new VehicleService();
-    private Dumper dumper = new Dumper();
-
+    private readonly PersonService personService = new();
+    private readonly VehicleService vehicleService = new();
+    private readonly Dumper dumper = new();
 
     [Benchmark]
     public async Task SimpleIAsync()
     {
-        /// Await Each page 
+        // Await each page
         await foreach (var page in personService.GetData())
         {
-            var map = page.ToDictionary(x=>x.UserName, x => x);
-            var processedPAge = await vehicleService.GetVehicle(map);
-            await dumper.Display(processedPAge);
+            var map = page.ToDictionary(x => x.UserName, x => x);
+            var processedPage = await vehicleService.GetVehicle(map);
+            await dumper.Display(processedPage);
         }
-
     }
 
     [Benchmark]
@@ -40,9 +34,8 @@ public class IAsyncBench
         await Parallel.ForEachAsync(personService.GetData(), async (page, ct) =>
         {
             var map = page.ToDictionary(x => x.UserName, x => x);
-            var processedPAge = await vehicleService.GetVehicle(map);
-            await dumper.Display(processedPAge);
+            var processedPage = await vehicleService.GetVehicle(map, ct);
+            await dumper.Display(processedPage, ct);
         });
     }
-
 }

@@ -1,14 +1,12 @@
-﻿
+﻿using System.Runtime.CompilerServices;
 using Bogus;
 
 namespace IAsyncEnumerablePages
 {
-    // Generate Page of data
+    // Generate page of data
     public class PersonService
     {
-
-        private Faker<Models.Person> f = new Faker<Models.Person>()
-
+        private readonly Faker<Models.Person> f = new Faker<Models.Person>()
             .RuleFor(u => u.Gender, f => f.PickRandom<Models.Gender>())
             .RuleFor(u => u.FirstName, (f, u) => f.Name.FirstName())
             .RuleFor(u => u.LastName, (f, u) => f.Name.LastName())
@@ -18,7 +16,7 @@ namespace IAsyncEnumerablePages
             .RuleFor(u => u.Email, (f, u) => f.Internet.Email(u.FirstName, u.LastName))
             .RuleFor(u => u.DateOfBirth, (f, u) => f.Date.Past());
 
-        public PersonService(int numberOfPages = 10, int pageSize = 10 )
+        public PersonService(int numberOfPages = 10, int pageSize = 10)
         {
             NumberOfPages = numberOfPages;
             PageSize = pageSize;
@@ -27,12 +25,12 @@ namespace IAsyncEnumerablePages
         public int NumberOfPages { get; }
         public int PageSize { get; }
 
-        public async IAsyncEnumerable<List<Models.Person>> GetData()
+        public async IAsyncEnumerable<List<Models.Person>> GetData([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            foreach (int value in Enumerable.Range(0, NumberOfPages))
+            foreach (int _ in Enumerable.Range(0, NumberOfPages))
             {
                 Console.WriteLine("PRODUCER");
-                await Task.Delay(100);
+                await Task.Delay(100, cancellationToken);
                 yield return f.Generate(PageSize);
             }
         }
