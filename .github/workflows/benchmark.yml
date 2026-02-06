@@ -3,8 +3,6 @@ name: Benchmark
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 permissions:
@@ -93,7 +91,7 @@ BenchmarkDotNet={data.get('Title', 'Unknown')}, OS={env_info.get('OsVersion', 'U
                 elif nanoseconds >= 1e6:
                     return f"{nanoseconds / 1e6:.3f} ms"
                 elif nanoseconds >= 1e3:
-                    return f"{nanoseconds / 1e3:.3f} us"
+                    return f"{nanoseconds / 1e3:.3f} μs"
                 else:
                     return f"{nanoseconds:.3f} ns"
             
@@ -112,8 +110,10 @@ BenchmarkDotNet={data.get('Title', 'Unknown')}, OS={env_info.get('OsVersion', 'U
         with open(readme_path, 'r') as f:
             readme_content = f.read()
         
-        # Replace the benchmark section
-        # Simple replacement - write the new benchmark output
+        # Note: Currently the README.md only contains benchmark results,
+        # so we replace the entire file. If the README grows to include
+        # other content, this should be updated to only replace the
+        # benchmark section between markers.
         with open(readme_path, 'w') as f:
             f.write(benchmark_output)
         
