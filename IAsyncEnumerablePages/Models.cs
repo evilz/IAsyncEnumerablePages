@@ -1,13 +1,4 @@
-﻿using Bogus;
-using Bogus.DataSets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Bogus.Person;
-
-namespace IAsyncEnumerablePages.Models;
+﻿namespace IAsyncEnumerablePages.Models;
 
 public enum Gender
 {
@@ -18,21 +9,20 @@ public enum Gender
 public class Person
 {
     public Gender Gender { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string FullName { get; set; }
-    public string UserName { get; set; }
-    public string Avatar { get; set; }
-    public string Email { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string FullName { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+    public string Avatar { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
     public DateTime DateOfBirth { get; set; }
-
 }
 
 public class Vehicle
 {
-    public string Vin { get; set; }
-    public string Manufacturer { get; set; }
-    public string Model { get; set; }
-    public string Type { get; set; }
-    public string Fuel { get; set; }
+    public string Vin { get; set; } = string.Empty;
+    public string Manufacturer { get; set; } = string.Empty;
+    public string Model { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public string Fuel { get; set; } = string.Empty;
 }
