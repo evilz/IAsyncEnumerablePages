@@ -1,5 +1,11 @@
-# Benchmark
+# IAsyncEnumerablePages
 
+Petit exemple en C# autour de la pagination à partir d’un `IAsyncEnumerable`.
+
+## Benchmarks
+
+<!-- BENCHMARKS:START -->
+# Benchmark
 
 ```sh
 
@@ -22,3 +28,4 @@ Intel Core i7-10700K CPU 3.80GHz, 1 CPU, 16 logical and 8 physical cores
 - Error  : Half of 99.9% confidence interval
 - StdDev : Standard deviation of all measurements
 - 1 s    : 1 Second (1 sec)
+<!-- BENCHMARKS:END -->
