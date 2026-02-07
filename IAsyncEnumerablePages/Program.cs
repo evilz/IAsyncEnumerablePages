@@ -12,14 +12,11 @@ public class Program
     }
 }
 
-
-
 public class IAsyncBench
 {
-    private PersonService personService = new PersonService();
-    private VehicleService vehicleService = new VehicleService();
-    private Dumper dumper = new Dumper();
-
+    private readonly PersonService personService = new PersonService();
+    private readonly VehicleService vehicleService = new VehicleService();
+    private readonly Dumper dumper = new Dumper();
 
     [Benchmark]
     public async Task SimpleIAsync()
@@ -27,11 +24,10 @@ public class IAsyncBench
         /// Await Each page 
         await foreach (var page in personService.GetData())
         {
-            var map = page.ToDictionary(x=>x.UserName, x => x);
-            var processedPAge = await vehicleService.GetVehicle(map);
-            await dumper.Display(processedPAge);
+            var map = page.ToDictionary(x => x.UserName, x => x);
+            var processedPage = await vehicleService.GetVehicle(map);
+            await dumper.Display(processedPage);
         }
-
     }
 
     [Benchmark]
@@ -40,9 +36,8 @@ public class IAsyncBench
         await Parallel.ForEachAsync(personService.GetData(), async (page, ct) =>
         {
             var map = page.ToDictionary(x => x.UserName, x => x);
-            var processedPAge = await vehicleService.GetVehicle(map);
-            await dumper.Display(processedPAge);
+            var processedPage = await vehicleService.GetVehicle(map, ct);
+            await dumper.Display(processedPage, ct);
         });
     }
-
 }

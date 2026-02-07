@@ -15,18 +15,14 @@ namespace IAsyncEnumerablePages
             .RuleFor(u => u.Type, f => f.Vehicle.Type())
             .RuleFor(u => u.Fuel, f => f.Vehicle.Fuel());
 
-        public async Task<Dictionary<string,(Models.Person,Models.Vehicle)>> GetVehicle(Dictionary<string,Models.Person> people) 
+        public async Task<Dictionary<string,(Models.Person,Models.Vehicle)>> GetVehicle(Dictionary<string,Models.Person> people, CancellationToken cancellationToken = default) 
         {
             Console.WriteLine("VehicleService");
-            await Task.Delay(1000);
+            await Task.Delay(1000, cancellationToken);
 
             var result = people.ToDictionary(x => x.Key, x => (x.Value, f.Generate()));
 
-
-
             return result;
-
-
         }
     }
 }

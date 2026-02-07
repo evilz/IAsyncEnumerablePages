@@ -27,12 +27,13 @@ namespace IAsyncEnumerablePages
         public int NumberOfPages { get; }
         public int PageSize { get; }
 
-        public async IAsyncEnumerable<List<Models.Person>> GetData()
+        public async IAsyncEnumerable<List<Models.Person>> GetData(CancellationToken cancellationToken = default)
         {
             foreach (int value in Enumerable.Range(0, NumberOfPages))
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 Console.WriteLine("PRODUCER");
-                await Task.Delay(100);
+                await Task.Delay(100, cancellationToken);
                 yield return f.Generate(PageSize);
             }
         }
